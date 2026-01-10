@@ -4,7 +4,7 @@
 
 Generate a complete PHP backend and React hook for sending emails from your forms. No external dependencies, no monthly fees, works with any hosting provider's SMTP.
 
-🌐 **[Try it now → Live Demo](https://alfredovilla.github.io/react-mailer)**
+🌐 **[Try it now → Live Demo](https://alfredo-villa.github.io/react-mailer)**
 
 ---
 
@@ -22,7 +22,7 @@ Generate a complete PHP backend and React hook for sending emails from your form
 
 ## 🚀 How It Works
 
-1. **Open the tool** at [alfredovilla.github.io/react-mailer](https://alfredovilla.github.io/react-mailer)
+1. **Open the tool** at [alfredo-villa.github.io/react-mailer](https://alfredo-villa.github.io/react-mailer)
 2. **Select your hosting** provider or enter SMTP details manually
 3. **Fill in** your domain and recipient email
 4. **Download** the generated files (mailer.php, mailer-config.php, useMailer.js)
@@ -145,7 +145,7 @@ If this tool saved you time, consider buying me a coffee:
 
 **Alfredo Villa**
 
-- GitHub: [@alfredovilla](https://github.com/alfredovilla)
+- GitHub: [@alfredovilla](https://github.com/alfredo-villa)
 
 ---
 
