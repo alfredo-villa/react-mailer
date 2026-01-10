@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Mailer - Free Email Setup for React Apps</title>
+    <meta name="description" content="Free tool to configure email sending from React applications. No dependencies, no costs, 100% local.">
+    <meta name="author" content="Alfredo Villa">
+    <meta property="og:title" content="React Mailer - Free Email Setup">
+    <meta property="og:description" content="Generate PHP backend and React hook for sending emails. 100% free, runs locally.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📧</text></svg>">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        :root{--bg:#0a0a0a;--card:#111;--border:#222;--text:#e5e5e5;--muted:#666;--accent:#3b82f6;--accent-hover:#2563eb;--success:#22c55e;--error:#ef4444}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+        
+        /* Header */
+        header{text-align:center;padding:3rem 1rem 2rem}
+        h1{font-size:2.5rem;font-weight:700;margin-bottom:0.5rem}
+        .tagline{color:var(--muted);font-size:1rem}
+        .lang-switch{margin-top:1rem;display:flex;justify-content:center;gap:0.25rem}
+        .lang-switch button{background:transparent;border:1px solid var(--border);color:var(--muted);padding:0.35rem 0.75rem;border-radius:4px;cursor:pointer;font-size:0.8rem;transition:all 0.2s}
+        .lang-switch button:hover,.lang-switch button.active{border-color:var(--accent);color:var(--accent)}
+        
+        /* Main */
+        main{flex:1;max-width:800px;width:100%;margin:0 auto;padding:0 1rem 2rem}
+        
+        /* Form Grid */
+        .form-grid{display:grid;gap:1rem}
+        .row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+        @media(max-width:600px){.row{grid-template-columns:1fr}}
+        
+        /* Fields */
+        .field{display:flex;flex-direction:column;gap:0.35rem}
+        .field label{font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em}
+        .field input,.field select{background:var(--card);border:1px solid var(--border);color:var(--text);padding:0.65rem 0.75rem;border-radius:6px;font-size:0.9rem;transition:border-color 0.2s}
+        .field input:focus,.field select:focus{outline:none;border-color:var(--accent)}
+        .field input::placeholder{color:#444}
+        .field select{cursor:pointer}
+        
+        /* Preset Select */
+        .preset-row{display:grid;grid-template-columns:1fr auto;gap:0.5rem;align-items:end}
+        .preset-row select{min-width:180px}
+        .btn-fill{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:0.65rem 1rem;border-radius:6px;cursor:pointer;font-size:0.85rem;transition:all 0.2s;white-space:nowrap}
+        .btn-fill:hover{border-color:var(--accent);color:var(--accent)}
+        
+        /* Divider */
+        .divider{height:1px;background:var(--border);margin:1.5rem 0}
+        
+        /* Generate Button */
+        .btn-generate{width:100%;background:var(--accent);color:#fff;border:none;padding:0.85rem;border-radius:6px;font-size:1rem;font-weight:600;cursor:pointer;transition:background 0.2s;margin-top:0.5rem}
+        .btn-generate:hover{background:var(--accent-hover)}
+        
+        /* Token Box */
+        .token-box{background:rgba(34,197,94,0.1);border:1px solid var(--success);border-radius:6px;padding:1rem;margin-top:1rem;display:none}
+        .token-box.show{display:block}
+        .token-box .label{color:var(--success);font-size:0.8rem;font-weight:600;margin-bottom:0.5rem}
+        .token-value{display:flex;gap:0.5rem;align-items:center}
+        .token-value code{flex:1;background:var(--bg);padding:0.5rem 0.75rem;border-radius:4px;font-size:0.75rem;word-break:break-all;font-family:'SF Mono',Monaco,monospace}
+        .token-value button{background:var(--card);border:1px solid var(--border);color:var(--text);padding:0.5rem 0.75rem;border-radius:4px;cursor:pointer;font-size:0.75rem}
+        .token-value button:hover{border-color:var(--accent)}
+        
+        /* Download Section */
+        .download-section{margin-top:1.5rem;display:none}
+        .download-section.show{display:block}
+        .download-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem}
+        @media(max-width:600px){.download-grid{grid-template-columns:repeat(2,1fr)}}
+        .btn-dl{background:var(--card);border:1px solid var(--border);color:var(--text);padding:0.65rem;border-radius:6px;cursor:pointer;font-size:0.8rem;transition:all 0.2s;text-align:center}
+        .btn-dl:hover{border-color:var(--accent);color:var(--accent)}
+        .btn-dl.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+        .btn-dl.primary:hover{background:var(--accent-hover)}
+        
+        /* Code Preview */
+        .code-preview{margin-top:1.5rem;display:none}
+        .code-preview.show{display:block}
+        .code-preview pre{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;overflow-x:auto;font-size:0.8rem;line-height:1.5}
+        .code-preview code{color:var(--text);font-family:'SF Mono',Monaco,monospace}
+        .endpoint{font-size:0.85rem;color:var(--muted);margin-bottom:0.75rem}
+        .endpoint span{color:var(--success);font-family:monospace}
+        
+        /* Footer */
+        footer{text-align:center;padding:2rem 1rem;border-top:1px solid var(--border);margin-top:auto}
+        .privacy{color:var(--success);font-size:0.85rem;margin-bottom:0.75rem;display:flex;align-items:center;justify-content:center;gap:0.5rem}
+        .credits{color:var(--muted);font-size:0.8rem}
+        .credits a{color:var(--accent);text-decoration:none}
+        .credits a:hover{text-decoration:underline}
+        
+        /* Hidden */
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📧 React Mailer</h1>
+        <p class="tagline" data-i18n="tagline">Generate email backend for React apps</p>
+        <div class="lang-switch">
+            <button class="active" onclick="setLang('en')">EN</button>
+            <button onclick="setLang('it')">IT</button>
+            <button onclick="setLang('es')">ES</button>
+            <button onclick="setLang('fr')">FR</button>
+        </div>
+    </header>
+
+    <main>
+        <div class="form-grid">
+            <!-- Preset -->
+            <div class="preset-row">
+                <div class="field">
+                    <label data-i18n="lbl_preset">Hosting Preset</label>
+                    <select id="preset">
+                        <option value="">-- Select provider --</option>
+                        <optgroup label="Europe">
+                            <option value="aruba">Aruba</option>
+                            <option value="ionos">IONOS</option>
+                            <option value="ovh">OVH</option>
+                            <option value="hetzner">Hetzner</option>
+                            <option value="strato">Strato</option>
+                            <option value="infomaniak">Infomaniak</option>
+                            <option value="register">Register.it</option>
+                            <option value="netsons">Netsons</option>
+                        </optgroup>
+                        <optgroup label="Americas">
+                            <option value="godaddy">GoDaddy</option>
+                            <option value="bluehost">Bluehost</option>
+                            <option value="hostgator">HostGator</option>
+                            <option value="dreamhost">DreamHost</option>
+                            <option value="namecheap">Namecheap</option>
+                            <option value="a2hosting">A2 Hosting</option>
+                            <option value="inmotion">InMotion</option>
+                        </optgroup>
+                        <optgroup label="Global">
+                            <option value="siteground">SiteGround</option>
+                            <option value="hostinger">Hostinger</option>
+                            <option value="cloudways">Cloudways</option>
+                            <option value="cpanel">cPanel (Generic)</option>
+                            <option value="plesk">Plesk (Generic)</option>
+                        </optgroup>
+                        <optgroup label="Email Services">
+                            <option value="gmail">Gmail</option>
+                            <option value="outlook">Outlook / O365</option>
+                            <option value="yahoo">Yahoo</option>
+                            <option value="zoho">Zoho Mail</option>
+                            <option value="sendgrid">SendGrid</option>
+                            <option value="mailgun">Mailgun</option>
+                            <option value="ses">Amazon SES</option>
+                            <option value="postmark">Postmark</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <button class="btn-fill" onclick="applyPreset()" data-i18n="btn_apply">Apply</button>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- SMTP -->
+            <div class="row">
+                <div class="field">
+                    <label data-i18n="lbl_host">SMTP Host</label>
+                    <input type="text" id="host" placeholder="smtp.example.com">
+                </div>
+                <div class="field">
+                    <label data-i18n="lbl_port">Port</label>
+                    <select id="port">
+                        <option value="587">587 (TLS)</option>
+                        <option value="465">465 (SSL)</option>
+                        <option value="25">25</option>
+                        <option value="2525">2525</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="field">
+                    <label data-i18n="lbl_user">SMTP Username</label>
+                    <input type="text" id="user" placeholder="noreply@example.com">
+                </div>
+                <div class="field">
+                    <label data-i18n="lbl_pass">SMTP Password</label>
+                    <input type="password" id="pass" placeholder="••••••••">
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Domain & Recipient -->
+            <div class="row">
+                <div class="field">
+                    <label data-i18n="lbl_domain">Your Domain</label>
+                    <input type="text" id="domain" placeholder="example.com">
+                </div>
+                <div class="field">
+                    <label data-i18n="lbl_recipient">Destination Email</label>
+                    <input type="email" id="recipient" placeholder="info@example.com">
+                </div>
+            </div>
+
+            <button class="btn-generate" onclick="generate()" data-i18n="btn_generate">🔑 Generate Configuration</button>
+
+            <!-- Token -->
+            <div class="token-box" id="tokenBox">
+                <div class="label">🔐 <span data-i18n="token_label">Security Token</span></div>
+                <div class="token-value">
+                    <code id="tokenCode"></code>
+                    <button onclick="copyToken()" data-i18n="btn_copy">Copy</button>
+                </div>
+            </div>
+
+            <!-- Downloads -->
+            <div class="download-section" id="downloadSection">
+                <div class="download-grid">
+                    <button class="btn-dl" onclick="dl('php')">mailer.php</button>
+                    <button class="btn-dl" onclick="dl('config')">config.php</button>
+                    <button class="btn-dl" onclick="dl('hook')">useMailer.ts</button>
+                    <button class="btn-dl primary" onclick="dlAll()">📦 ZIP</button>
+                </div>
+            </div>
+
+            <!-- Code Preview -->
+            <div class="code-preview" id="codePreview">
+                <p class="endpoint" data-i18n="endpoint_txt">Endpoint: <span id="endpointUrl"></span></p>
+                <pre><code id="codeBlock"></code></pre>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="privacy">🔒 <span data-i18n="privacy">100% local. No data sent to servers.</span></div>
+        <div class="credits">
+            Open Source • Made by <a href="https://alfredovilla.it" target="_blank">Alfredo Villa</a> • 
+            <a href="https://www.paypal.com/donate/?hosted_button_id=RC7PFSSJE8CH4" target="_blank">Give me a tip ❤️</a>
+        </div>
+    </footer>
+
+<script>
+const i18n={
+en:{tagline:"Generate email backend for React apps",lbl_preset:"Hosting Preset",btn_apply:"Apply",lbl_host:"SMTP Host",lbl_port:"Port",lbl_user:"SMTP Username",lbl_pass:"SMTP Password",lbl_domain:"Your Domain",lbl_recipient:"Destination Email",btn_generate:"🔑 Generate Configuration",token_label:"Security Token",btn_copy:"Copy",endpoint_txt:"Endpoint:",privacy:"100% local. No data sent to servers.",alert_fill:"Please fill all fields",copied:"Copied!",msg_ok:"Email sent successfully!",msg_err_token:"Invalid token",msg_err_req:"Required field",msg_err_email:"Invalid email",msg_err_rate:"Too many requests. Try again in %d min.",msg_err_smtp:"SMTP connection failed",msg_new:"New message",msg_from:"Sent from contact form",msg_copy_s:"Copy:",msg_copy_t:"Thank you for contacting us."},
+it:{tagline:"Genera backend email per app React",lbl_preset:"Preset Hosting",btn_apply:"Applica",lbl_host:"Host SMTP",lbl_port:"Porta",lbl_user:"Username SMTP",lbl_pass:"Password SMTP",lbl_domain:"Il tuo Dominio",lbl_recipient:"Email di destinazione",btn_generate:"🔑 Genera Configurazione",token_label:"Token di Sicurezza",btn_copy:"Copia",endpoint_txt:"Endpoint:",privacy:"100% locale. Nessun dato inviato a server.",alert_fill:"Compila tutti i campi",copied:"Copiato!",msg_ok:"Email inviata con successo!",msg_err_token:"Token non valido",msg_err_req:"Campo obbligatorio",msg_err_email:"Email non valida",msg_err_rate:"Troppe richieste. Riprova tra %d min.",msg_err_smtp:"Connessione SMTP fallita",msg_new:"Nuovo messaggio",msg_from:"Inviato dal form di contatto",msg_copy_s:"Copia:",msg_copy_t:"Grazie per averci contattato."},
+es:{tagline:"Genera backend de email para apps React",lbl_preset:"Preset Hosting",btn_apply:"Aplicar",lbl_host:"Host SMTP",lbl_port:"Puerto",lbl_user:"Usuario SMTP",lbl_pass:"Contraseña SMTP",lbl_domain:"Tu Dominio",lbl_recipient:"Email de destino",btn_generate:"🔑 Generar Configuración",token_label:"Token de Seguridad",btn_copy:"Copiar",endpoint_txt:"Endpoint:",privacy:"100% local. No se envían datos a servidores.",alert_fill:"Completa todos los campos",copied:"¡Copiado!",msg_ok:"¡Email enviado!",msg_err_token:"Token inválido",msg_err_req:"Campo requerido",msg_err_email:"Email inválido",msg_err_rate:"Demasiadas solicitudes. Intenta en %d min.",msg_err_smtp:"Conexión SMTP fallida",msg_new:"Nuevo mensaje",msg_from:"Enviado desde formulario",msg_copy_s:"Copia:",msg_copy_t:"Gracias por contactarnos."},
+fr:{tagline:"Générez un backend email pour apps React",lbl_preset:"Preset Hébergeur",btn_apply:"Appliquer",lbl_host:"Hôte SMTP",lbl_port:"Port",lbl_user:"Utilisateur SMTP",lbl_pass:"Mot de passe SMTP",lbl_domain:"Votre Domaine",lbl_recipient:"Email de destination",btn_generate:"🔑 Générer Configuration",token_label:"Token de Sécurité",btn_copy:"Copier",endpoint_txt:"Endpoint:",privacy:"100% local. Aucune donnée envoyée.",alert_fill:"Remplissez tous les champs",copied:"Copié!",msg_ok:"Email envoyé!",msg_err_token:"Token invalide",msg_err_req:"Champ requis",msg_err_email:"Email invalide",msg_err_rate:"Trop de requêtes. Réessayez dans %d min.",msg_err_smtp:"Connexion SMTP échouée",msg_new:"Nouveau message",msg_from:"Envoyé depuis formulaire",msg_copy_s:"Copie:",msg_copy_t:"Merci de nous avoir contactés."}
+};
+
+const presets={aruba:{h:'smtps.aruba.it',p:'465'},ionos:{h:'smtp.ionos.com',p:'587'},ovh:{h:'ssl0.ovh.net',p:'587'},hetzner:{h:'mail.your-server.de',p:'587'},strato:{h:'smtp.strato.de',p:'465'},infomaniak:{h:'mail.infomaniak.com',p:'587'},register:{h:'smtps.register.it',p:'465'},netsons:{h:'smtps.netsons.net',p:'465'},godaddy:{h:'smtpout.secureserver.net',p:'465'},bluehost:{h:'mail.DOMAIN',p:'465'},hostgator:{h:'mail.DOMAIN',p:'465'},dreamhost:{h:'smtp.dreamhost.com',p:'465'},namecheap:{h:'mail.privateemail.com',p:'587'},a2hosting:{h:'mail.DOMAIN',p:'465'},inmotion:{h:'mail.DOMAIN',p:'465'},siteground:{h:'mail.DOMAIN',p:'465'},hostinger:{h:'smtp.hostinger.com',p:'587'},cloudways:{h:'smtp.gmail.com',p:'587'},cpanel:{h:'mail.DOMAIN',p:'587'},plesk:{h:'mail.DOMAIN',p:'587'},gmail:{h:'smtp.gmail.com',p:'587'},outlook:{h:'smtp-mail.outlook.com',p:'587'},yahoo:{h:'smtp.mail.yahoo.com',p:'587'},zoho:{h:'smtp.zoho.com',p:'587'},sendgrid:{h:'smtp.sendgrid.net',p:'587'},mailgun:{h:'smtp.mailgun.org',p:'587'},ses:{h:'email-smtp.us-east-1.amazonaws.com',p:'587'},postmark:{h:'smtp.postmarkapp.com',p:'587'}};
+
+let lang='en',token='',cfg={};
+
+function t(k){return i18n[lang][k]||i18n.en[k]||k}
+function setLang(l){
+    lang=l;
+    document.querySelectorAll('.lang-switch button').forEach(b=>b.classList.remove('active'));
+    document.querySelector(`.lang-switch button[onclick="setLang('${l}')"]`).classList.add('active');
+    document.querySelectorAll('[data-i18n]').forEach(e=>e.textContent=t(e.dataset.i18n));
+    if(cfg.domain)updateCode();
+}
+function cleanDomain(d){return d.replace(/^(https?:\/\/)?(www\.)?/i,'').replace(/\/+$/,'')}
+function applyPreset(){
+    const sel=document.getElementById('preset').value;
+    if(!sel)return;
+    const p=presets[sel],dom=cleanDomain(document.getElementById('domain').value)||'DOMAIN';
+    document.getElementById('host').value=p.h.replace('DOMAIN',dom);
+    document.getElementById('port').value=p.p;
+}
+function genToken(){const a=new Uint8Array(32);crypto.getRandomValues(a);return Array.from(a,b=>b.toString(16).padStart(2,'0')).join('')}
+function generate(){
+    const h=document.getElementById('host').value.trim(),
+          p=document.getElementById('port').value,
+          u=document.getElementById('user').value.trim(),
+          pw=document.getElementById('pass').value,
+          d=cleanDomain(document.getElementById('domain').value),
+          r=document.getElementById('recipient').value.trim();
+    if(!h||!u||!pw||!d||!r){alert(t('alert_fill'));return}
+    token=genToken();
+    cfg={host:h,port:p,user:u,pass:pw,domain:d,recipient:r,enc:p==='465'?'ssl':'tls',token,lang};
+    document.getElementById('tokenCode').textContent=token;
+    document.getElementById('tokenBox').classList.add('show');
+    document.getElementById('downloadSection').classList.add('show');
+    document.getElementById('codePreview').classList.add('show');
+    document.getElementById('endpointUrl').textContent=`https://${d}/api/mailer.php`;
+    updateCode();
+}
+function updateCode(){
+    document.getElementById('codeBlock').textContent=`import { useMailer } from './hooks/useMailer';
+
+const { sendEmail, loading, error, success } = useMailer(
+  'https://${cfg.domain}/api/mailer.php',
+  '${cfg.token}'
+);
+
+await sendEmail({ fields: { email, message, website: '' } });`;
+}
+function copyToken(){
+    navigator.clipboard.writeText(token);
+    const btn=event.target;btn.textContent=t('copied');
+    setTimeout(()=>btn.textContent=t('btn_copy'),1500);
+}
+function dlFile(c,n){
+    const b=new Blob([c],{type:'text/plain;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');
+    a.href=u;a.download=n;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);
+}
+function genPHP(){const m=i18n[cfg.lang]||i18n.en;return`<?php
+ini_set('display_errors',0);error_reporting(E_ALL);
+$config=require_once __DIR__.'/mailer-config.php';
+class ReactMailer{
+    private $config,$rateFile;
+    public function __construct($c){$this->config=$c;$this->rateFile=__DIR__.'/rate_limits.json';if($c['logging']['enabled']){$d=dirname($c['logging']['file']);if(!is_dir($d))mkdir($d,0755,true);}}
+    public function run(){$this->cors();if($_SERVER['REQUEST_METHOD']==='OPTIONS'){http_response_code(200);exit;}if($_SERVER['REQUEST_METHOD']!=='POST')return $this->err('Method not allowed',405);try{$data=json_decode(file_get_contents('php://input'),true);if(json_last_error()!==JSON_ERROR_NONE)throw new Exception('Invalid JSON');$this->auth($data);if($this->config['rate_limit']['on'])$this->rateLimit();if($this->config['honeypot']&&!empty($data['fields'][$this->config['honeypot_field']])){$this->log('Bot',$data);return $this->ok(['message'=>$this->config['msg']['ok']]);}$this->validate($data);$this->send($data);$this->log('Sent',$data);return $this->ok(['message'=>$this->config['msg']['ok'],'sent_at'=>date('Y-m-d H:i:s')]);}catch(Exception $e){$this->log('Err: '.$e->getMessage(),$data??[]);return $this->err($e->getMessage());}}
+    private function cors(){$o=$_SERVER['HTTP_ORIGIN']??'';$ok=false;foreach($this->config['origins'] as $a){if($o===$a){$ok=true;break;}$oh=parse_url($o,PHP_URL_HOST);$ah=parse_url($a,PHP_URL_HOST);if($oh&&$ah&&preg_replace('/^www\\./i','',$oh)===preg_replace('/^www\\./i','',$ah)){$ok=true;break;}}if($ok)header("Access-Control-Allow-Origin: $o");header('Access-Control-Allow-Methods: POST, OPTIONS');header('Access-Control-Allow-Headers: Content-Type, X-Mailer-Token');header('Content-Type: application/json; charset=utf-8');}
+    private function auth($d){$t=$_SERVER['HTTP_X_MAILER_TOKEN']??$d['_token']??'';if($t!==$this->config['token'])throw new Exception($this->config['msg']['err_token']);}
+    private function rateLimit(){$ip=$this->ip();$l=file_exists($this->rateFile)?json_decode(file_get_contents($this->rateFile),true):[];$now=time();$w=$this->config['rate_limit']['window'];$max=$this->config['rate_limit']['max'];$l=array_filter($l,fn($r)=>($now-$r['t'])<$w);if(isset($l[$ip])&&$l[$ip]['c']>=$max){$m=ceil(($w-($now-$l[$ip]['t']))/60);throw new Exception(str_replace('%d',$m,$this->config['msg']['err_rate']));}$l[$ip]=['t'=>$l[$ip]['t']??$now,'c'=>($l[$ip]['c']??0)+1];file_put_contents($this->rateFile,json_encode($l));}
+    private function validate($d){$f=$d['fields']??[];foreach($this->config['required'] as $r){if(empty($f[$r]))throw new Exception($this->config['msg']['err_req'].": $r");}if(!empty($f['email'])&&!filter_var($f['email'],FILTER_VALIDATE_EMAIL))throw new Exception($this->config['msg']['err_email']);}
+    private function send($d){$f=$d['fields']??[];$to=$this->config['to'];$subj=$d['subject']??$f['subject']??$this->config['msg']['new'];$body=$this->body($f);$h=$this->headers($f);$this->smtp($to,$subj,$body,$h);if($this->config['copy']&&!empty($f['email'])){$this->smtp($f['email'],$this->config['msg']['copy_s'].' '.$subj,$this->config['msg']['copy_t']."\\n\\n".$body,$h);}}
+    private function body($f){$r='';foreach($f as $k=>$v){if(is_array($v))$v=implode(', ',$v);$r.="<tr><td style='padding:10px;border-bottom:1px solid #eee;font-weight:bold;background:#f8f9fa'>".strtoupper(htmlspecialchars($k))."</td><td style='padding:10px;border-bottom:1px solid #eee'>".nl2br(htmlspecialchars($v))."</td></tr>";}return"<!DOCTYPE html><html><body style='margin:0;padding:20px;font-family:Arial,sans-serif;background:#f5f5f5'><table style='max-width:600px;margin:0 auto;background:#fff;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.1)'><tr><td style='background:#3b82f6;color:#fff;padding:20px;text-align:center'><h2 style='margin:0'>{$this->config['msg']['new']}</h2></td></tr><tr><td style='padding:20px'><table style='width:100%'>$r</table></td></tr><tr><td style='background:#f8f9fa;padding:15px;text-align:center;font-size:12px;color:#666'>{$this->config['msg']['from']} | IP: {$this->ip()} | ".date('d/m/Y H:i')."</td></tr></table></body></html>";}
+    private function headers($f){$fr=$this->config['smtp']['user'];return['From'=>$fr,'Reply-To'=>$f['email']??$fr,'MIME-Version'=>'1.0','Content-Type'=>'text/html; charset=UTF-8'];}
+    private function smtp($to,$subj,$body,$h){$s=$this->config['smtp'];$host=($s['port']==465||$s['enc']==='ssl')?"ssl://{$s['host']}":$s['host'];$sock=@fsockopen($host,$s['port'],$en,$es,30);if(!$sock)throw new Exception($this->config['msg']['err_smtp'].": $es");$this->smtpR($sock);$this->smtpC($sock,"EHLO ".($_SERVER['SERVER_NAME']??'localhost'));if($s['enc']==='tls'){$this->smtpC($sock,"STARTTLS");stream_socket_enable_crypto($sock,true,STREAM_CRYPTO_METHOD_TLS_CLIENT);$this->smtpC($sock,"EHLO ".($_SERVER['SERVER_NAME']??'localhost'));}$this->smtpC($sock,"AUTH LOGIN");$this->smtpC($sock,base64_encode($s['user']));$this->smtpC($sock,base64_encode($s['pass']));$this->smtpC($sock,"MAIL FROM: <{$s['user']}>");$this->smtpC($sock,"RCPT TO: <$to>");$this->smtpC($sock,"DATA");$msg="";foreach($h as $k=>$v)$msg.="$k: $v\\r\\n";$msg.="To: $to\\r\\nSubject: =?UTF-8?B?".base64_encode($subj)."?=\\r\\n\\r\\n$body\\r\\n.\\r\\n";fputs($sock,$msg);$this->smtpR($sock);$this->smtpC($sock,"QUIT");fclose($sock);}
+    private function smtpC($s,$c){fputs($s,"$c\\r\\n");return $this->smtpR($s);}
+    private function smtpR($s){$r='';while($l=fgets($s,515)){$r.=$l;if(substr($l,3,1)===' ')break;}if((int)substr($r,0,3)>=400)throw new Exception("SMTP: $r");return $r;}
+    private function ip(){foreach(['HTTP_CF_CONNECTING_IP','HTTP_X_FORWARDED_FOR','HTTP_X_REAL_IP','REMOTE_ADDR']as $h){if(!empty($_SERVER[$h])){$ip=explode(',',$_SERVER[$h])[0];if(filter_var(trim($ip),FILTER_VALIDATE_IP))return trim($ip);}}return'0.0.0.0';}
+    private function log($m,$d=[]){if(!$this->config['logging']['enabled'])return;$f=$this->config['logging']['file'];if(file_exists($f)&&filesize($f)>5242880)rename($f,$f.'.'.date('YmdHis'));file_put_contents($f,sprintf("[%s] %s | IP: %s | %s\\n",date('Y-m-d H:i:s'),$m,$this->ip(),json_encode($d,JSON_UNESCAPED_UNICODE)),FILE_APPEND);}
+    private function ok($d){http_response_code(200);echo json_encode(['success'=>true,'data'=>$d]);exit;}
+    private function err($m,$c=400){http_response_code($c);echo json_encode(['success'=>false,'error'=>$m]);exit;}
+}
+(new ReactMailer($config))->run();`}
+
+function genCfg(){const c=cfg,m=i18n[c.lang]||i18n.en;return`<?php
+// React Mailer Config - Generated ${new Date().toISOString().split('T')[0]}
+return [
+    'smtp'=>['host'=>'${c.host}','port'=>${c.port},'enc'=>'${c.enc}','user'=>'${c.user}','pass'=>'${c.pass}'],
+    'token'=>'${c.token}',
+    'to'=>'${c.recipient}',
+    'origins'=>['https://${c.domain}','https://www.${c.domain}','http://${c.domain}','http://www.${c.domain}','http://localhost:3000','http://localhost:5173','http://127.0.0.1:3000','http://127.0.0.1:5173'],
+    'rate_limit'=>['on'=>true,'max'=>5,'window'=>3600],
+    'honeypot'=>true,'honeypot_field'=>'website',
+    'copy'=>true,
+    'required'=>['email','message'],
+    'logging'=>['enabled'=>true,'file'=>__DIR__.'/logs/mailer.log'],
+    'msg'=>['ok'=>'${m.msg_ok}','err_token'=>'${m.msg_err_token}','err_req'=>'${m.msg_err_req}','err_email'=>'${m.msg_err_email}','err_rate'=>'${m.msg_err_rate}','err_smtp'=>'${m.msg_err_smtp}','new'=>'${m.msg_new}','from'=>'${m.msg_from}','copy_s'=>'${m.msg_copy_s}','copy_t'=>'${m.msg_copy_t}']
+];`}
+
+function genHook(){return`import { useState, useCallback } from 'react';
+
+interface Options { timeout?: number; resetAfter?: number | false; onSuccess?: (d: any) => void; onError?: (e: string) => void; }
+interface FormData { fields: Record<string, string | string[]>; subject?: string; }
+
+export function useMailer(endpoint: string, token: string, opts: Options = {}) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const sendEmail = useCallback(async (data: FormData) => {
+    setLoading(true); setError(null); setSuccess(false);
+    try {
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), opts.timeout || 30000);
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Mailer-Token': token },
+        body: JSON.stringify({ ...data, _token: token }),
+        signal: ctrl.signal
+      });
+      clearTimeout(tid);
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || 'Failed');
+      setSuccess(true);
+      opts.onSuccess?.(json.data);
+      if (opts.resetAfter !== false) setTimeout(() => setSuccess(false), opts.resetAfter || 5000);
+      return json.data;
+    } catch (e: any) {
+      const msg = e.name === 'AbortError' ? 'Timeout' : e.message;
+      setError(msg); opts.onError?.(msg); throw e;
+    } finally { setLoading(false); }
+  }, [endpoint, token, opts]);
+
+  const reset = useCallback(() => { setLoading(false); setError(null); setSuccess(false); }, []);
+  return { sendEmail, reset, loading, error, success };
+}
+
+export default useMailer;`}
+
+function genReadme(){return`# React Mailer
+
+## Setup
+1. Upload \`mailer.php\` + \`mailer-config.php\` to \`/api/\`
+2. Copy \`useMailer.ts\` to \`src/hooks/\`
+
+## Usage
+\`\`\`tsx
+import { useMailer } from './hooks/useMailer';
+
+const { sendEmail, loading, error, success } = useMailer(
+  'https://${cfg.domain}/api/mailer.php',
+  '${cfg.token}'
+);
+
+await sendEmail({ fields: { email, message, website: '' } });
+\`\`\`
+
+## .env
+\`\`\`
+VITE_MAILER_URL=https://${cfg.domain}/api/mailer.php
+VITE_MAILER_TOKEN=${cfg.token}
+\`\`\`
+`}
+
+function dl(type){
+    const files={php:[genPHP(),'mailer.php'],config:[genCfg(),'mailer-config.php'],hook:[genHook(),'useMailer.ts']};
+    dlFile(files[type][0],files[type][1]);
+}
+
+async function dlAll(){
+    try{
+        const z=new JSZip();
+        z.file('mailer.php',genPHP());
+        z.file('mailer-config.php',genCfg());
+        z.file('useMailer.ts',genHook());
+        z.file('README.md',genReadme());
+        z.file('.env.example',`VITE_MAILER_URL=https://${cfg.domain}/api/mailer.php\nVITE_MAILER_TOKEN=${cfg.token}`);
+        const b=await z.generateAsync({type:'blob'});
+        const u=URL.createObjectURL(b),a=document.createElement('a');
+        a.href=u;a.download='react-mailer.zip';document.body.appendChild(a);a.click();
+        document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(u),1000);
+    }catch(e){alert('ZIP error. Try individual downloads.');}
+}
+
+// Init
+document.addEventListener('DOMContentLoaded',()=>{
+    const bl=navigator.language.split('-')[0];
+    if(i18n[bl])setLang(bl);
+});
+</script>
+</body>
+</html>
